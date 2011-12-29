@@ -1,11 +1,11 @@
 #!/usr/bin/python
 
-# CLI knowledge base tool
+# Command Line Knowledge Base
 # Created by Tim de Pater
 # tim at trafex dot nl
 #
-# See kb --help for how to use this
-#
+# See clkb --help for how to use this
+# 
 
 import sys
 import os
@@ -182,7 +182,7 @@ def listing():
 
 #===== MAIN =====#
 def main():
-    p = optparse.OptionParser(description='CLI knowledge base tool', version='CLI knowledge base tool - version 1.0.0-BETA - 20111229')
+    p = optparse.OptionParser(description='CLKB - Command Line Knowledge Base', version='CLKB - version 1.0.0-BETA - 20111229')
     p.add_option('--create', '-c', action="callback", callback=create, help="create a new item")
     p.add_option('--edit', '-e', action="callback", callback=edit, dest="id", metavar="ID", type="int", help="edit a item")
     p.add_option('--delete', '-d', action="callback", callback=delete, dest="id", metavar="ID", type="int", help="delete a item")
