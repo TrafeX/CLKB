@@ -83,7 +83,7 @@ class KbItems:
 
 #===== HELPER DEFINITIONS =====#
 def getDbConn():
-    appdir = os.path.expanduser('~') + '/.kbTool/'
+    appdir = os.path.expanduser('~') + '/.clkb/'
     if not os.path.exists(appdir):
         os.makedirs(appdir)
 
