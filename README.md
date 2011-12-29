@@ -1,13 +1,12 @@
-KB Tool
+Command Line Knowledge Base
 ====
-A python app to simply add/edit/delete knowledge base snippets, nifty one-liners and all other stuff you want to store and find back.
-Everything is done on the CLI.
+A python app to simply create/edit/delete knowledge base snippets, nifty one-liners and all other stuff you want to store simply on the command line.
 
 Help
 ====
-Usage: kb [options]
+Usage: clkb [options]
 
-CLI KB tool
+CLKB - Command Line Knowledge Base
 
 Options:
   --version             show program's version number and exit
@@ -18,6 +17,7 @@ Options:
   -s QUERY, --search=QUERY
                         search items
 
+
 Work in progress
 ====
-This tool is still in progress
+This tool is still work in progress..
