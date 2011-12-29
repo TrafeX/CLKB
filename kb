@@ -1,0 +1,188 @@
+#!/usr/bin/python
+import sys
+import os
+import subprocess
+import tempfile
+import optparse
+import readline
+from sqlite3 import dbapi2 as sqlite
+from datetime import datetime, date, time
+
+#===== CLASSES =====#
+class KbItem (object):
+    def __init__ (self, description, tags, content, adddate="", moddate="", rowid=""):
+        self.description = description;
+        self.tags = tags;
+        self.content = content;
+        self.adddate = adddate;
+        self.moddate = moddate;
+        self.rowid = rowid;
+        
+    def create(self):
+        conn = getDbConn();
+        conn.execute('INSERT INTO items (description, tags, content, adddate, moddate) VALUES (?,?,?,datetime("now"),datetime("now"))', (self.description,self.tags,self.content))
+        conn.commit();
+        
+    def update(self, rowid):
+        conn = getDbConn();
+        conn.execute('UPDATE items SET description = ?, tags = ?, content = ?, moddate = datetime("now") WHERE id = ?', (self.description,self.tags,self.content,rowid))
+        conn.commit();
+
+        
+class KbItems:
+    def __init__ (self):
+        self.count = 0;
+        
+    def listing(self):
+        conn = getDbConn();
+        cursor = conn.execute("select description, tags, content, adddate, moddate, id from items");
+        self.resultset = cursor.fetchall()
+        return self
+
+    def search(self, query):
+        conn = getDbConn();
+        cursor = conn.execute("select description, tags, content, adddate, moddate, id from items where description like ? or tags like ?", ['%'+query+'%', '%'+query+'%']);
+        self.resultset = cursor.fetchall()
+        return self
+        
+    def fetchById(self, rowid):
+        conn = getDbConn();
+        cursor = conn.execute("select description, tags, content, adddate, moddate, id from items where id = ?", [rowid]);
+        res = cursor.fetchone()
+        return self.resultsetToClass(res)
+   
+    def delete(self, rowid):
+        conn = getDbConn();
+        conn.execute('DELETE FROM items WHERE id = ?', [rowid])
+        conn.commit();
+        
+    def __iter__(self):
+        return self
+        
+    def __len__(self):
+        return len(self.resultset)
+
+    def next(self):
+        if self.count >= len(self.resultset):
+            raise StopIteration
+            
+        res = self.resultset[self.count]
+        self.count += 1
+        return self.resultsetToClass(res)
+        
+    def resultsetToClass(self, res):
+        return KbItem(res[0], res[1], res[2], res[3], res[4], res[5]);
+
+#===== METHODS =====#
+def getDbConn():
+    dbfile = "database/kb.db";
+    if os.path.isfile(dbfile):
+        conn = sqlite.connect(dbfile);
+    else:
+        print "Database doesn't exists, creating new";
+        conn = sqlite.connect(dbfile);
+        conn.execute("""create table items (
+            id integer primary key autoincrement,
+            description varchar,
+            tags varchar,
+            content text,
+            adddate varchar,
+            moddate varchar
+            )""");
+    return conn;
+
+def rlinput(prompt, prefill=''):
+   readline.set_startup_hook(lambda: readline.insert_text(prefill))
+   try:
+      return raw_input(prompt)
+   finally:
+      readline.set_startup_hook()
+
+#===== ACTIONS =====#
+def create(option, opt, value, parser):
+    t = tempfile.NamedTemporaryFile(delete=False)
+    try:
+        editor = os.environ['EDITOR']
+    except KeyError:
+        editor = 'vim'
+    subprocess.call([editor, t.name])
+    content = open(t.name, 'r').read();
+    
+    desc = raw_input('Description: ');
+    tags = raw_input('Tags (comma separated): ');
+    if desc == "":
+        print "No description found, aborted"
+        sys.exit(1)
+    KbItem(desc, tags, content).create();
+    print "Sucessfully added item"
+    sys.exit(0)
+    
+def edit(option, opt, value, parser):
+    item = KbItems().fetchById(value);
+    
+    t = tempfile.NamedTemporaryFile()
+    t.write(item.content);
+    t.flush()
+    
+    try:
+        editor = os.environ['EDITOR']
+    except KeyError:
+        editor = 'vim'
+    subprocess.call([editor, t.name])
+    content = open(t.name, 'r').read();
+    
+    desc = rlinput('Description: ', item.description);
+    tags = rlinput('Tags (comma separated): ', item.tags);
+
+    KbItem(desc, tags, content).update(value);
+    print "Sucessfully updated item {}".format(value);
+    sys.exit(0)
+    
+def delete(option, opt, value, parser):
+    item = KbItems().fetchById(value);
+    confirm = raw_input('Are you sure you want to delete "'+item.description+'" (type \'yes\'): ')
+    if confirm == "yes":
+        KbItems().delete(value);
+        print "Sucessfully deleted item {}".format(value);
+        
+    sys.exit(0)
+    
+def search(option, opt, value, parser):
+    print "Searching for '" + value + "'.."
+    showList(KbItems().search(value))
+    sys.exit(0)
+
+def listing():
+    showList(KbItems().listing())
+    sys.exit(0)
+
+def showList(data):
+    RESET_SEQ = "\033[0m"
+    COLOR_SEQ = "\033[1;%dm"
+    BOLD_SEQ = "\033[1m"
+
+    print "Results:", len(data)
+    for row in data:
+        message = '{0} - {1} (tags: {2} moddate: {3})\n{5}\n$BOLD{4}$RESET\n{5}'.format(row.rowid, row.description, row.tags, row.moddate, row.content, ('-' * 80))
+        message = message.replace("$RESET", RESET_SEQ).replace("$BOLD", BOLD_SEQ).replace("$COLOR", COLOR_SEQ);
+        print message
+
+#===== MAIN =====#
+def main():
+    p = optparse.OptionParser(description='CLI KB tool', version='0.1')
+    p.add_option('--create', '-c', action="callback", callback=create, help="create a new item")
+    p.add_option('--edit', '-e', action="callback", callback=edit, dest="id", metavar="ID", type="int", help="edit a item")
+    p.add_option('--delete', '-d', action="callback", callback=delete, dest="id", metavar="ID", type="int", help="delete a item")
+    p.add_option('--search', '-s', action="callback", callback=search, dest="query", metavar="QUERY", type="string", help="search items")
+    opts, args = p.parse_args()
+    
+    listing()
+
+    sys.exit(0);
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (KeyboardInterrupt):
+        print "\nExit\n"
+        
