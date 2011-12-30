@@ -33,7 +33,7 @@ This tool is still work in progress. If you want a feature to be added, please l
 
 TODO
 ======
-    [ ] Fix the timezone for the add- and moddate
+    [X] Fix the timezone for the add- and moddate
     [ ] Better error handling
     [ ] Scale the width on tiny screens
     [X] Cutoff long content

@@ -15,6 +15,7 @@ import optparse
 import readline
 from sqlite3 import dbapi2 as sqlite
 from datetime import datetime, date, time
+from dateutil import tz
 
 #===== CLASSES =====#
 class KbItem (object):
@@ -112,6 +113,13 @@ def rlinput(prompt, prefill=''):
    finally:
       readline.set_startup_hook()
       
+def formatDate(dt):
+    t = datetime.strptime(dt, "%Y-%m-%d %H:%M:%S")
+    from_zone = tz.tzutc()
+    to_zone = tz.tzlocal()
+    utc = t.replace(tzinfo=from_zone)
+    return  utc.astimezone(to_zone).strftime('%Y-%m-%d %H:%M:%S')
+
 def showList(data, hidecontent = False):
     RESET_SEQ = "\033[0m"
     COLOR_SEQ = "\033[1;32m"
@@ -120,9 +128,9 @@ def showList(data, hidecontent = False):
     print "Results:", len(data)
     for row in data:
         
-        message = '$COLOR{0} - {1} $RESET(tags: $COLOR{2}$RESET moddate: {3})\n{4}'.format(row.rowid, row.description, row.tags, row.moddate, ('-' * 80))
+        message = '$COLOR{0} - {1} $RESET(tags: $COLOR{2}$RESET moddate: {3})\n{4}'.format(row.rowid, row.description, row.tags, formatDate(row.moddate), ('-' * 80))
         if hidecontent == False:
-            message = '$COLOR{0} - {1} $RESET(tags: $COLOR{2}$RESET moddate: {3})\n{5}\n{4}\n{5}'.format(row.rowid, row.description, row.tags, row.moddate, wrapText(row.content), ('-' * 80))
+            message = '$COLOR{0} - {1} $RESET(tags: $COLOR{2}$RESET moddate: {3})\n{5}\n{4}\n{5}'.format(row.rowid, row.description, row.tags, formatDate(row.moddate), wrapText(row.content), ('-' * 80))
         
         message = message.replace("$RESET", RESET_SEQ).replace("$BOLD", BOLD_SEQ).replace("$COLOR", COLOR_SEQ);
         print message
@@ -191,7 +199,6 @@ def listing(opts):
     showList(KbItems().listing(opts.limit), opts.hidecontent)
     sys.exit(0)
 
-
 def item(option, opt, value, parser):
     showList([KbItems().fetchById(value)])
     sys.exit(0)
@@ -199,7 +206,7 @@ def item(option, opt, value, parser):
 
 #===== MAIN =====#
 def main():
-    p = optparse.OptionParser(description='%prog - Command Line Knowledge Base', version='%prog - version 1.0.0-BETA - 20111229')
+    p = optparse.OptionParser(description='%prog - Command Line Knowledge Base', version='%prog - version 1.0.0-BETA - 20111230')
     p.add_option('--create', '-c', action="callback", callback=create, help="create a new item")
     p.add_option('--edit', '-e', action="callback", callback=edit, dest="id", metavar="ID", type="int", help="edit a item")
     p.add_option('--delete', '-d', action="callback", callback=delete, dest="id", metavar="ID", type="int", help="delete a item")
