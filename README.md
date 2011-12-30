@@ -1,6 +1,6 @@
 Command Line Knowledge Base
 ====
-A python app to simply create/edit/delete knowledge base snippets, nifty one-liners and all other stuff you want to store simply on the command line.
+A python app to simply create/edit/delete knowledge base snippets, nifty one-liners and all other stuff you want to store simply by using the command line.
 
 Help
 ====
@@ -21,4 +21,11 @@ Options:
 
 Work in progress
 ====
-This tool is still work in progress..
+This tool is still work in progress. If you want a feature to be added, please let me know or send a pull request.
+
+TODO
+======
+    [ ] Fix the timezone for the add- and moddate
+    [ ] Better error handling
+    [ ] Scale the width on tiny screens
+    [ ] Cutoff long content and implement a detail action
