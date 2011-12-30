@@ -41,9 +41,9 @@ class KbItems:
     def __init__ (self):
         self.count = 0;
         
-    def listing(self):
+    def listing(self, limit):
         conn = getDbConn();
-        cursor = conn.execute("select description, tags, content, adddate, moddate, id from items order by moddate desc");
+        cursor = conn.execute("select description, tags, content, adddate, moddate, id from items order by moddate desc limit ?", [limit]);
         self.resultset = cursor.fetchall()
         return self
 
@@ -175,21 +175,22 @@ def search(option, opt, value, parser):
     showList(KbItems().search(value))
     sys.exit(0)
 
-def listing():
-    showList(KbItems().listing())
+def listing(limit):
+    showList(KbItems().listing(limit))
     sys.exit(0)
 
 
 #===== MAIN =====#
 def main():
-    p = optparse.OptionParser(description='CLKB - Command Line Knowledge Base', version='CLKB - version 1.0.0-BETA - 20111229')
+    p = optparse.OptionParser(description='%prog - Command Line Knowledge Base', version='%prog - version 1.0.0-BETA - 20111229')
     p.add_option('--create', '-c', action="callback", callback=create, help="create a new item")
     p.add_option('--edit', '-e', action="callback", callback=edit, dest="id", metavar="ID", type="int", help="edit a item")
     p.add_option('--delete', '-d', action="callback", callback=delete, dest="id", metavar="ID", type="int", help="delete a item")
     p.add_option('--search', '-s', action="callback", callback=search, dest="query", metavar="QUERY", type="string", help="search items")
+    p.add_option('--limit', '-l', dest="limit", metavar="LIMIT", type="int", help="limit the listing to [LIMIT] items (default 50)", default=50)
     opts, args = p.parse_args()
     
-    listing()
+    listing(opts.limit)
 
     sys.exit(0);
 
