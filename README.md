@@ -7,16 +7,24 @@ Help
 <pre>
 Usage: clkb [options]
 
-CLKB - Command Line Knowledge Base
+clkb - Command Line Knowledge Base
 
 Options:
-    --version             show program's version number and exit
-    -h, --help            show this help message and exit
-    -c, --create          create a new item
-    -e ID, --edit=ID      edit a item
-    -d ID, --delete=ID    delete a item
-    -s QUERY, --search=QUERY
+  --version             show program's version number and exit
+  -h, --help            show this help message and exit
+  -c, --create          create a new item
+  -e ID, --edit=ID      edit a item
+  -d ID, --delete=ID    delete a item
+  -s QUERY, --search=QUERY
                         search items
+  -i ID, --item=ID      show the item
+
+  List/search options:
+    These options can be used when searching or listing the items
+
+    -l LIMIT, --limit=LIMIT
+                        limit the listing to [LIMIT] items (default 50)
+    --hide-content      hides the content in the listing
 </pre>
 
 Work in progress
