@@ -79,6 +79,8 @@ class KbItems:
         return self.resultsetToClass(res)
         
     def resultsetToClass(self, res):
+        if res == None:
+            raise ValueError('Item not found')
         return KbItem(res[0], res[1], res[2], res[3], res[4], res[5]);
 
 #===== HELPER DEFINITIONS =====#
@@ -110,7 +112,7 @@ def rlinput(prompt, prefill=''):
    finally:
       readline.set_startup_hook()
       
-def showList(data, hidecontent):
+def showList(data, hidecontent = False):
     RESET_SEQ = "\033[0m"
     COLOR_SEQ = "\033[1;32m"
     BOLD_SEQ = "\033[1m"
@@ -190,6 +192,11 @@ def listing(opts):
     sys.exit(0)
 
 
+def item(option, opt, value, parser):
+    showList([KbItems().fetchById(value)])
+    sys.exit(0)
+
+
 #===== MAIN =====#
 def main():
     p = optparse.OptionParser(description='%prog - Command Line Knowledge Base', version='%prog - version 1.0.0-BETA - 20111229')
@@ -197,6 +204,7 @@ def main():
     p.add_option('--edit', '-e', action="callback", callback=edit, dest="id", metavar="ID", type="int", help="edit a item")
     p.add_option('--delete', '-d', action="callback", callback=delete, dest="id", metavar="ID", type="int", help="delete a item")
     p.add_option('--search', '-s', action="callback", callback=search, dest="query", metavar="QUERY", type="string", help="search items")
+    p.add_option('--item', '-i', action="callback", callback=item, dest="id", metavar="ID", type="int", help="show the item")
     
     group = optparse.OptionGroup(p, "List/search options",
                     "These options can be used when searching or listing the items")
@@ -212,6 +220,8 @@ def main():
 if __name__ == "__main__":
     try:
         main()
+    except ValueError as strerror:
+        print strerror
     except (KeyboardInterrupt):
         print "\nExit\n"
         

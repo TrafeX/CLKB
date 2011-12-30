@@ -28,4 +28,7 @@ TODO
     [ ] Fix the timezone for the add- and moddate
     [ ] Better error handling
     [ ] Scale the width on tiny screens
-    [ ] Cutoff long content and implement a detail action
+    [X] Cutoff long content
+    [X] Add action to show detail
+    [ ] Maybe a sort of syntax highlighting
+    [X] Add argument to hide content in listing
