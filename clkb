@@ -1,11 +1,23 @@
-#!/usr/bin/python
-
-# Command Line Knowledge Base
-# Created by Tim de Pater
-# tim at trafex dot nl
+#!/usr/bin/env python
 #
-# See clkb --help for how to use this
-# 
+#    Command Line Knowledge Base
+#
+#    Copyright (c) 2012, Tim de Pater <code AT trafex DOT nl>
+#    <https://github.com/TrafeX/CLKB>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
 import sys
 import os
@@ -16,6 +28,15 @@ import readline
 from sqlite3 import dbapi2 as sqlite
 from datetime import datetime, date, time
 from dateutil import tz
+
+__author__ = "Tim de Pater"
+__copyright__ = "Copyright (c) 2012, Tim de Pater"
+__credits__ = ["Tim de Pater"]
+__license__ = "GPLv3"
+__version__ = "1.0.0-BETA"
+__maintainer__ = "Tim de Pater"
+__email__ = "code@trafex.nl"
+__status__ = "Beta"
 
 #===== CLASSES =====#
 class KbItem (object):
@@ -206,7 +227,7 @@ def item(option, opt, value, parser):
 
 #===== MAIN =====#
 def main():
-    p = optparse.OptionParser(description='%prog - Command Line Knowledge Base', version='%prog - version 1.0.0-BETA - 20111230')
+    p = optparse.OptionParser(description='%prog - Command Line Knowledge Base', version='%prog - '+__version__)
     p.add_option('--create', '-c', action="callback", callback=create, help="create a new item")
     p.add_option('--edit', '-e', action="callback", callback=edit, dest="id", metavar="ID", type="int", help="edit a item")
     p.add_option('--delete', '-d', action="callback", callback=delete, dest="id", metavar="ID", type="int", help="delete a item")

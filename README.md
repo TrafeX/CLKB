@@ -1,9 +1,24 @@
 Command Line Knowledge Base
-====
-A python app to simply create/edit/delete knowledge base snippets, nifty one-liners and all other stuff you want to store simply by using the command line.
+===========================
+A command line app to manage knowledge-base snippets, nifty one-liners and everything you simply want to store by using the command line.
+When you create a new item your favorite CLI-editor pops up and lets you add the content. When you close the editor you'll be aked for a short description and optionally some tags to quickly find it back.
 
-Help
-====
+
+Copyright (c) 2012, Tim de Pater <code@trafex.nl>
+
+
+Install
+=======
+You want to use this app? Then follow these steps:
+
+1. Download the latest version here: <https://github.com/TrafeX/CLKB/tags>
+2. Copy the clkb file to /usr/local/bin
+3. Typ clkb --help or see below for usage information
+
+
+Usage
+=====
+
 <pre>
 Usage: clkb [options]
 
@@ -28,11 +43,11 @@ Options:
 </pre>
 
 Work in progress
-====
-This tool is still work in progress. If you want a feature to be added, please let me know or send a pull request.
+================
+This tool is still in progress. If you want a feature to be added, please let me know or send a pull request.
 
 TODO
-======
+----
     [X] Fix the timezone for the add- and moddate
     [ ] Better error handling
     [ ] Scale the width on tiny screens
@@ -40,3 +55,4 @@ TODO
     [X] Add action to show detail
     [ ] Maybe a sort of syntax highlighting
     [X] Add argument to hide content in listing
+    [ ] Create a .deb package
