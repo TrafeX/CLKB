@@ -9,12 +9,13 @@ Copyright (c) 2012, Tim de Pater <code@trafex.nl>
 
 Install
 =======
-You want to use this app? Then follow these steps:
+You want to use this app? If you are on debian/ubuntu, you can!
+Follow these steps:
 
-1. Download the latest version here: <https://github.com/TrafeX/CLKB/tags>
-2. Copy the clkb file to /usr/local/bin
-3. Typ clkb --help or see below for usage information
-
+1. Make sure you have python and python-dateutil installed (apt-get install python python-dateutil)
+2. Download the latest version here: <https://github.com/downloads/TrafeX/CLKB/clkb_1.0.0-1_all.deb>
+3. Install with dpkg -i clkb_*.deb
+4. Typ clkb --help or see below for how to use
 
 Usage
 =====
@@ -55,4 +56,5 @@ TODO
     [X] Add action to show detail
     [ ] Maybe a sort of syntax highlighting
     [X] Add argument to hide content in listing
-    [ ] Create a .deb package
+    [X] Create a .deb package
+    [ ] Add the option to store the DB on a other location
