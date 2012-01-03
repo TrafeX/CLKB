@@ -13,7 +13,7 @@ You want to use this app? If you are on debian/ubuntu, you can!
 Follow these steps:
 
 1. Make sure you have python and python-dateutil installed (apt-get install python python-dateutil)
-2. Download the latest version here: <https://github.com/downloads/TrafeX/CLKB/clkb_1.0.0-1_all.deb>
+2. Download the latest version here: <https://github.com/downloads/TrafeX/CLKB/clkb_1.0.0-BETA2_all.deb>
 3. Install with dpkg -i clkb_*.deb
 4. Typ clkb --help or see below for how to use
 
