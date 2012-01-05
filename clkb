@@ -178,7 +178,7 @@ def create(option, opt, value, parser):
         print "No description found, aborted"
         sys.exit(1)
     KbItem(desc, tags, content).create();
-    print "Sucessfully added item"
+    print "Successfully added item"
     sys.exit(0)
     
 def edit(option, opt, value, parser):
@@ -199,7 +199,7 @@ def edit(option, opt, value, parser):
     tags = rlinput('Tags (comma separated): ', item.tags);
 
     KbItem(desc, tags, content).update(value);
-    print "Sucessfully updated item {}".format(value);
+    print "Successfully updated item {}".format(value);
     sys.exit(0)
     
 def delete(option, opt, value, parser):
@@ -207,7 +207,7 @@ def delete(option, opt, value, parser):
     confirm = raw_input('Are you sure you want to delete "'+item.description+'" (type \'yes\'): ')
     if confirm == "yes":
         KbItems().delete(value);
-        print "Sucessfully deleted item {}".format(value);
+        print "Successfully deleted item {}".format(value);
         
     sys.exit(0)
     
