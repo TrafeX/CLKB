@@ -49,13 +49,19 @@ class KbItem (object):
         self.rowid = rowid;
         
     def create(self):
-        conn = getDbConn();
-        conn.execute('INSERT INTO items (description, tags, content, adddate, moddate) VALUES (?,?,?,datetime("now"),datetime("now"))', (self.description,self.tags,self.content))
+        conn = db_conn();
+        conn.execute("""INSERT INTO items (
+                                            description, tags,
+                                            content, adddate,
+                                            moddate)
+                        VALUES (?,?,?,datetime("now"),datetime("now"))""",
+                     (self.description,self.tags,self.content))
         conn.commit();
         
     def update(self, rowid):
-        conn = getDbConn();
-        conn.execute('UPDATE items SET description = ?, tags = ?, content = ?, moddate = datetime("now") WHERE id = ?', (self.description,self.tags,self.content,rowid))
+        conn = db_conn();
+        conn.execute('UPDATE items SET description = ?, tags = ?, content = ?, moddate = datetime("now") WHERE id = ?',
+                     (self.description,self.tags,self.content,rowid))
         conn.commit();
 
         
@@ -64,25 +70,29 @@ class KbItems:
         self.count = 0;
         
     def listing(self, limit):
-        conn = getDbConn();
-        cursor = conn.execute("select description, tags, content, adddate, moddate, id from items order by moddate desc limit ?", [limit]);
+        conn = db_conn();
+        cursor = conn.execute("""SELECT description, tags, content, adddate, moddate, id
+                                 FROM items ORDER BY moddate DESC LIMIT ?""", [limit]);
         self.resultset = cursor.fetchall()
         return self
 
     def search(self, query, limit):
-        conn = getDbConn();
-        cursor = conn.execute("select description, tags, content, adddate, moddate, id from items where description like ? or tags like ? limit ?", ['%'+query+'%', '%'+query+'%', limit]);
+        conn = db_conn();
+        cursor = conn.execute("""SELECT description, tags, content, adddate, moddate, id
+                                 FROM items WHERE description LIKE ? OR tags LIKE ? limit ?""",
+                              ['%'+query+'%', '%'+query+'%', limit]);
         self.resultset = cursor.fetchall()
         return self
         
-    def fetchById(self, rowid):
-        conn = getDbConn();
-        cursor = conn.execute("select description, tags, content, adddate, moddate, id from items where id = ?", [rowid]);
+    def fetch_by_id(self, rowid):
+        conn = db_conn();
+        cursor = conn.execute("""SELECT description, tags, content, adddate, moddate, id
+                                 FROM items WHERE id = ?""", [rowid]);
         res = cursor.fetchone()
-        return self.resultsetToClass(res)
+        return self.resultset_to_class(res)
    
     def delete(self, rowid):
-        conn = getDbConn();
+        conn = db_conn();
         conn.execute('DELETE FROM items WHERE id = ?', [rowid])
         conn.commit();
         
@@ -98,15 +108,15 @@ class KbItems:
             
         res = self.resultset[self.count]
         self.count += 1
-        return self.resultsetToClass(res)
+        return self.resultset_to_class(res)
         
-    def resultsetToClass(self, res):
+    def resultset_to_class(self, res):
         if res == None:
             raise ValueError('Item not found')
         return KbItem(res[0], res[1], res[2], res[3], res[4], res[5]);
 
 #===== HELPER DEFINITIONS =====#
-def getDbConn():
+def db_conn():
     appdir = os.path.expanduser('~') + '/.clkb/'
     if not os.path.exists(appdir):
         os.makedirs(appdir)
@@ -118,13 +128,13 @@ def getDbConn():
         print "Database doesn't exists, creating new";
         conn = sqlite.connect(dbfile);
         conn.execute("""create table items (
-            id integer primary key autoincrement,
-            description varchar,
-            tags varchar,
-            content text,
-            adddate varchar,
-            moddate varchar
-            )""");
+                        id integer primary key autoincrement,
+                        description varchar,
+                        tags varchar,
+                        content text,
+                        adddate varchar,
+                        moddate varchar
+                        )""");
     return conn;
 
 def rlinput(prompt, prefill=''):
@@ -134,14 +144,14 @@ def rlinput(prompt, prefill=''):
    finally:
       readline.set_startup_hook()
       
-def formatDate(dt):
+def format_date(dt):
     t = datetime.strptime(dt, "%Y-%m-%d %H:%M:%S")
     from_zone = tz.tzutc()
     to_zone = tz.tzlocal()
     utc = t.replace(tzinfo=from_zone)
     return  utc.astimezone(to_zone).strftime('%Y-%m-%d %H:%M:%S')
 
-def showList(data, hidecontent = False):
+def show_list(data, hidecontent = False, fullContent = False):
     RESET_SEQ = "\033[0m"
     COLOR_SEQ = "\033[1;32m"
     BOLD_SEQ = "\033[1m"
@@ -149,14 +159,25 @@ def showList(data, hidecontent = False):
     print "Results:", len(data)
     for row in data:
         
-        message = '$COLOR{0} - {1} $RESET(tags: $COLOR{2}$RESET moddate: {3})\n{4}'.format(row.rowid, row.description, row.tags, formatDate(row.moddate), ('-' * 80))
+        message = '$COLOR{0} - {1} $RESET(tags: $COLOR{2}$RESET moddate: {3})\n{4}'.format(row.rowid,
+                                                                                           row.description,
+                                                                                           row.tags,
+                                                                                           format_date(row.moddate),
+                                                                                           ('-' * 80))
         if hidecontent == False:
-            message = '$COLOR{0} - {1} $RESET(tags: $COLOR{2}$RESET moddate: {3})\n{5}\n{4}\n{5}'.format(row.rowid, row.description, row.tags, formatDate(row.moddate), wrapText(row.content), ('-' * 80))
+            content = row.content
+            if fullContent == False:
+                content = wrap_text(row.content)
+            message = '$COLOR{0} - {1} $RESET(tags: $COLOR{2}$RESET moddate: {3})\n{5}\n{4}\n{5}'.format(row.rowid,
+                                                                                                         row.description,
+                                                                                                         row.tags,
+                                                                                                         format_date(row.moddate),
+                                                                                                         content, ('-' * 80))
         
         message = message.replace("$RESET", RESET_SEQ).replace("$BOLD", BOLD_SEQ).replace("$COLOR", COLOR_SEQ);
         print message
 
-def wrapText(text, width=100):
+def wrap_text(text, width=100):
     substr = text[0:width]
     if substr != text:
         substr += '...'
@@ -182,7 +203,7 @@ def create(option, opt, value, parser):
     sys.exit(0)
     
 def edit(option, opt, value, parser):
-    item = KbItems().fetchById(value);
+    item = KbItems().fetch_by_id(value);
     
     t = tempfile.NamedTemporaryFile()
     t.write(item.content);
@@ -203,7 +224,7 @@ def edit(option, opt, value, parser):
     sys.exit(0)
     
 def delete(option, opt, value, parser):
-    item = KbItems().fetchById(value);
+    item = KbItems().fetch_by_id(value);
     confirm = raw_input('Are you sure you want to delete "'+item.description+'" (type \'yes\'): ')
     if confirm == "yes":
         KbItems().delete(value);
@@ -213,31 +234,42 @@ def delete(option, opt, value, parser):
     
 def search(option, opt, value, parser):
     print "Searching for '" + value + "'.."
-    showList(KbItems().search(value, parser.values.limit), parser.values.hidecontent)
+    show_list(KbItems().search(value, parser.values.limit), parser.values.hidecontent)
     sys.exit(0)
 
 def listing(opts):
-    showList(KbItems().listing(opts.limit), opts.hidecontent)
+    show_list(KbItems().listing(opts.limit), opts.hidecontent)
     sys.exit(0)
 
 def item(option, opt, value, parser):
-    showList([KbItems().fetchById(value)])
+    show_list([KbItems().fetch_by_id(value)], False, True)
     sys.exit(0)
 
 
 #===== MAIN =====#
 def main():
     p = optparse.OptionParser(description='%prog - Command Line Knowledge Base', version='%prog - '+__version__)
-    p.add_option('--create', '-c', action="callback", callback=create, help="create a new item")
-    p.add_option('--edit', '-e', action="callback", callback=edit, dest="id", metavar="ID", type="int", help="edit a item")
-    p.add_option('--delete', '-d', action="callback", callback=delete, dest="id", metavar="ID", type="int", help="delete a item")
-    p.add_option('--search', '-s', action="callback", callback=search, dest="query", metavar="QUERY", type="string", help="search items")
-    p.add_option('--item', '-i', action="callback", callback=item, dest="id", metavar="ID", type="int", help="show the item")
+    p.add_option('--create', '-c', action="callback",
+                 callback=create, help="create a new item")
+    p.add_option('--edit', '-e', action="callback",
+                 callback=edit, dest="id", metavar="ID",
+                 type="int", help="edit a item")
+    p.add_option('--delete', '-d', action="callback",
+                 callback=delete, dest="id", metavar="ID",
+                 type="int", help="delete a item")
+    p.add_option('--search', '-s', action="callback",
+                 callback=search, dest="query", metavar="QUERY",
+                 type="string", help="search items")
+    p.add_option('--item', '-i', action="callback",
+                 callback=item, dest="id", metavar="ID",
+                 type="int", help="show the item")
     
     group = optparse.OptionGroup(p, "List/search options",
-                    "These options can be used when searching or listing the items")
-    group.add_option('--limit', '-l', dest="limit", metavar="LIMIT", type="int", help="limit the listing to [LIMIT] items (default 50)", default=50)
-    group.add_option('--hide-content', action="store_true", dest="hidecontent", help="hides the content in the listing", default=False)
+                                 "These options can be used when searching or listing the items")
+    group.add_option('--limit', '-l', dest="limit", metavar="LIMIT",
+                     type="int", help="limit the listing to [LIMIT] items (default 50)", default=50)
+    group.add_option('--hide-content', action="store_true", dest="hidecontent",
+                     help="hides the content in the listing", default=False)
     p.add_option_group(group)
     opts, args = p.parse_args()
 

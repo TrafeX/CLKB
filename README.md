@@ -58,3 +58,5 @@ TODO
     [X] Add argument to hide content in listing
     [X] Create a .deb package
     [ ] Add the option to store the DB on a other location
+    [X] The item detail doesn't show the full content
+    [ ] Write a unit test
