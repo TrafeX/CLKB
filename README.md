@@ -4,17 +4,25 @@ A command line app to manage knowledge-base snippets, nifty one-liners and every
 When you create a new item your favorite CLI-editor pops up and lets you add the content. When you close the editor you'll be aked for a short description and optionally some tags to quickly find it back.
 
 
-Copyright (c) 2012, Tim de Pater <code@trafex.nl>
-
-
 Install
 =======
-You want to use this app? If you are on debian/ubuntu, you can!
+You want to use this app? You can!
+
+Debian/Ubuntu
+-------------
 Follow these steps:
 
 1. Make sure you have python and python-dateutil installed (apt-get install python python-dateutil)
 2. Download the latest version here: <https://github.com/downloads/TrafeX/CLKB/clkb_1.0.0-BETA2_all.deb>
 3. Install with dpkg -i clkb_*.deb
+4. Typ clkb --help or see below for how to use
+
+Redhat/Fedora/CentOS:
+-------------
+Follow these steps:
+1. Make sure you have python, python-dateutil and sqlite installed (yum install python python-dateutil sqlite)
+2. Download the latest tag here <https://github.com/TrafeX/CLKB/tags>
+3. Unpack the file and copy clkb to /usr/local/bin/
 4. Typ clkb --help or see below for how to use
 
 Usage
@@ -49,14 +57,8 @@ This tool is still in progress. If you want a feature to be added, please let me
 
 TODO
 ----
-    [X] Fix the timezone for the add- and moddate
     [ ] Better error handling
     [ ] Scale the width on tiny screens
-    [X] Cutoff long content
-    [X] Add action to show detail
-    [ ] Maybe a sort of syntax highlighting
-    [X] Add argument to hide content in listing
-    [X] Create a .deb package
+    [X] Maybe a sort of syntax highlighting
     [ ] Add the option to store the DB on a other location
-    [X] The item detail doesn't show the full content
     [ ] Write a unit test

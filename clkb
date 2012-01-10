@@ -29,6 +29,15 @@ from sqlite3 import dbapi2 as sqlite
 from datetime import datetime, date, time
 from dateutil import tz
 
+try:
+    from pygments import highlight
+    from pygments.lexers import BashLexer
+    from pygments.formatters import TerminalFormatter
+
+    highlighterAvailable = True
+except ImportError:
+    highlighterAvailable = False
+
 __author__ = "Tim de Pater"
 __copyright__ = "Copyright (c) 2012, Tim de Pater"
 __credits__ = ["Tim de Pater"]
@@ -149,7 +158,7 @@ def format_date(dt):
     from_zone = tz.tzutc()
     to_zone = tz.tzlocal()
     utc = t.replace(tzinfo=from_zone)
-    return  utc.astimezone(to_zone).strftime('%Y-%m-%d %H:%M:%S')
+    return utc.astimezone(to_zone).strftime('%Y-%m-%d %H:%M:%S')
 
 def show_list(data, hidecontent = False, fullContent = False):
     RESET_SEQ = "\033[0m"
@@ -168,6 +177,8 @@ def show_list(data, hidecontent = False, fullContent = False):
             content = row.content
             if fullContent == False:
                 content = wrap_text(row.content)
+            if highlighterAvailable == True:
+                content = highlight(content, BashLexer(), TerminalFormatter())
             message = '$COLOR{0} - {1} $RESET(tags: $COLOR{2}$RESET moddate: {3})\n{5}\n{4}\n{5}'.format(row.rowid,
                                                                                                          row.description,
                                                                                                          row.tags,
