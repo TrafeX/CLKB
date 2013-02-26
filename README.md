@@ -20,6 +20,7 @@ Follow these steps:
 Redhat/Fedora/CentOS:
 -------------
 Follow these steps:
+
 1. Make sure you have python, python-dateutil and sqlite installed (yum install python python-dateutil sqlite)
 2. Download the latest tag here <https://github.com/TrafeX/CLKB/tags>
 3. Unpack the file and copy clkb to /usr/local/bin/
