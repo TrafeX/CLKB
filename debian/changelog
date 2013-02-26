@@ -1,0 +1,13 @@
+clkb (1.0.0) quantal; urgency=low
+
+  *  Scale text length for tiny terminals
+  *  Fixed bug when piping output to other program like head or tail
+  *  Removed beta status
+
+ -- Tim de Pater <code@trafex.nl>  Tue, 26 Feb 2013 15:36:46 +0100
+
+clkb (1.0.0-BETA2) oneiric; urgency=low
+
+  * Initial release.
+
+ -- Tim de Pater <code@trafex.nl>  Tue, 03 Jan 2012 17:04:23 +0100

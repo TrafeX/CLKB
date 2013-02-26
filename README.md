@@ -13,7 +13,7 @@ Debian/Ubuntu
 Follow these steps:
 
 1. Make sure you have python and python-dateutil installed (apt-get install python python-dateutil)
-2. Download the latest version here: <https://github.com/downloads/TrafeX/CLKB/clkb_1.0.0_all.deb>
+2. Download the latest Debian package here: <http://www.trafex.nl/command-line-knowledge-base>
 3. Install with dpkg -i clkb_*.deb
 4. Type clkb --help or see below for how to use
 

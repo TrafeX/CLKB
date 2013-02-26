@@ -1,0 +1,10 @@
+Package: clkb
+Version: 1.0.0
+Architecture: all
+Maintainer: Tim de Pater <code@trafex.nl>
+Installed-Size: 41
+Depends: python, python-dateutil
+Section: unknown
+Priority: extra
+Homepage: https://github.com/TrafeX/CLKB
+Description: Command Line Knowledge Base
