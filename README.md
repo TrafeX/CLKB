@@ -1,6 +1,6 @@
 Command Line Knowledge Base
 ===========================
-A command line app to manage knowledge-base snippets, nifty one-liners and everything you simply want to store by using the command line.
+A command line app to manage knowledge base snippets, nifty one-liners and everything you simply want to store by using the command line.
 When you create a new item your favorite CLI-editor pops up and lets you add the content. When you close the editor you'll be aked for a short description and optionally some tags to quickly find it back.
 
 
@@ -13,9 +13,9 @@ Debian/Ubuntu
 Follow these steps:
 
 1. Make sure you have python and python-dateutil installed (apt-get install python python-dateutil)
-2. Download the latest version here: <https://github.com/downloads/TrafeX/CLKB/clkb_1.0.0-BETA2_all.deb>
+2. Download the latest version here: <https://github.com/downloads/TrafeX/CLKB/clkb_1.0.0_all.deb>
 3. Install with dpkg -i clkb_*.deb
-4. Typ clkb --help or see below for how to use
+4. Type clkb --help or see below for how to use
 
 Redhat/Fedora/CentOS:
 -------------
@@ -23,7 +23,7 @@ Follow these steps:
 1. Make sure you have python, python-dateutil and sqlite installed (yum install python python-dateutil sqlite)
 2. Download the latest tag here <https://github.com/TrafeX/CLKB/tags>
 3. Unpack the file and copy clkb to /usr/local/bin/
-4. Typ clkb --help or see below for how to use
+4. Type clkb --help or see below for how to use
 
 Usage
 =====
@@ -58,7 +58,7 @@ This tool is still in progress. If you want a feature to be added, please let me
 TODO
 ----
     [ ] Better error handling
-    [ ] Scale the width on tiny screens
+    [X] Scale the width on tiny screens
     [X] Maybe a sort of syntax highlighting
     [ ] Add the option to store the DB on a other location
     [ ] Write a unit test
