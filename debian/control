@@ -1,0 +1,14 @@
+Source: clkb
+Section: unknown
+Priority: extra
+Maintainer: Tim de Pater <code@trafex.nl>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.2
+Homepage: https://github.com/TrafeX/CLKB
+Vcs-Git: git://github.com/TrafeX/CLKB.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/clkb.git;a=summary
+
+Package: clkb
+Architecture: all
+Depends: python, python-dateutil
+Description: Command Line Knowledge Base

@@ -1,0 +1,315 @@
+#!/usr/bin/env python
+#
+#    Command Line Knowledge Base
+#
+#    Copyright (c) 2013, Tim de Pater <code AT trafex DOT nl>
+#    <https://github.com/TrafeX/CLKB>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+import sys
+import os
+import subprocess
+import tempfile
+import optparse
+import readline
+from sqlite3 import dbapi2 as sqlite
+from datetime import datetime, date, time
+from dateutil import tz
+
+try:
+    from pygments import highlight
+    from pygments.lexers import BashLexer
+    from pygments.formatters import TerminalFormatter
+
+    highlighterAvailable = True
+except ImportError:
+    highlighterAvailable = False
+
+__author__ = "Tim de Pater"
+__copyright__ = "Copyright (c) 2013, Tim de Pater"
+__credits__ = ["Tim de Pater"]
+__license__ = "GPLv3"
+__version__ = "1.0.0"
+__maintainer__ = "Tim de Pater"
+__email__ = "code@trafex.nl"
+__status__ = "Stable"
+
+#===== CLASSES =====#
+class KbItem (object):
+    def __init__ (self, description, tags, content, adddate=None, moddate=None, rowid=None):
+        self.description = description;
+        self.tags = tags;
+        self.content = content;
+        self.adddate = adddate;
+        self.moddate = moddate;
+        self.rowid = rowid;
+
+    def create(self):
+        conn = db_conn();
+        conn.execute("""INSERT INTO items (
+                                            description, tags,
+                                            content, adddate,
+                                            moddate)
+                        VALUES (?,?,?,datetime("now"),datetime("now"))""",
+                     (self.description, self.tags, self.content))
+        conn.commit();
+
+    def update(self, rowid):
+        conn = db_conn();
+        conn.execute('UPDATE items SET description = ?, tags = ?, content = ?, moddate = datetime("now") WHERE id = ?',
+                     (self.description,self.tags,self.content,rowid))
+        conn.commit();
+
+
+class KbItems:
+    def __init__ (self):
+        self.count = 0;
+
+    def listing(self, limit):
+        conn = db_conn();
+        cursor = conn.execute("""SELECT description, tags, content, adddate, moddate, id
+                                 FROM items ORDER BY moddate DESC LIMIT ?""", [limit]);
+        self.resultset = cursor.fetchall()
+        return self
+
+    def search(self, query, limit):
+        conn = db_conn();
+        cursor = conn.execute("""SELECT description, tags, content, adddate, moddate, id
+                                 FROM items WHERE description LIKE ? OR tags LIKE ? limit ?""",
+                              ['%'+query+'%', '%'+query+'%', limit]);
+        self.resultset = cursor.fetchall()
+        return self
+
+    def fetch_by_id(self, rowid):
+        conn = db_conn();
+        cursor = conn.execute("""SELECT description, tags, content, adddate, moddate, id
+                                 FROM items WHERE id = ?""", [rowid]);
+        res = cursor.fetchone()
+        return self.resultset_to_class(res)
+
+    def delete(self, rowid):
+        conn = db_conn();
+        conn.execute('DELETE FROM items WHERE id = ?', [rowid])
+        conn.commit();
+
+    def __iter__(self):
+        return self
+
+    def __len__(self):
+        return len(self.resultset)
+
+    def next(self):
+        if self.count >= len(self.resultset):
+            raise StopIteration
+
+        res = self.resultset[self.count]
+        self.count += 1
+        return self.resultset_to_class(res)
+
+    def resultset_to_class(self, res):
+        if res == None:
+            raise ValueError('Item not found')
+        return KbItem(res[0], res[1], res[2], res[3], res[4], res[5]);
+
+#===== HELPER DEFINITIONS =====#
+def db_conn():
+    appdir = os.path.expanduser('~') + '/.clkb/'
+    if not os.path.exists(appdir):
+        os.makedirs(appdir)
+
+    dbfile = appdir + 'kb.db';
+    if os.path.isfile(dbfile):
+        conn = sqlite.connect(dbfile);
+    else:
+        print "Database doesn't exists, creating new";
+        conn = sqlite.connect(dbfile);
+        conn.execute("""create table items (
+                        id integer primary key autoincrement,
+                        description varchar,
+                        tags varchar,
+                        content text,
+                        adddate varchar,
+                        moddate varchar
+                        )""");
+    return conn;
+
+def rlinput(prompt, prefill=''):
+   readline.set_startup_hook(lambda: readline.insert_text(prefill))
+   try:
+      return raw_input(prompt)
+   finally:
+      readline.set_startup_hook()
+
+def format_date(dt):
+    t = datetime.strptime(dt, "%Y-%m-%d %H:%M:%S")
+    from_zone = tz.tzutc()
+    to_zone = tz.tzlocal()
+    utc = t.replace(tzinfo=from_zone)
+    return utc.astimezone(to_zone).strftime('%Y-%m-%d %H:%M:%S')
+
+def show_list(data, hidecontent = False, fullContent = False):
+    RESET_SEQ = "\033[0m"
+    COLOR_SEQ = "\033[1;32m"
+    BOLD_SEQ = "\033[1m"
+    textlimit = 100
+    dashlimit = 80
+    try:
+        rows, columns = os.popen('stty size', 'r').read().split()
+        textlimit = int(columns)-5
+        dashlimit = int(columns)
+    except Exception as e:
+        pass
+
+    print "Results:", len(data)
+    for row in data:
+
+        message = '$COLOR{0} - {1} $RESET(tags: $COLOR{2}$RESET moddate: {3})\n{4}'.format(row.rowid,
+                                                                                           row.description,
+                                                                                           row.tags,
+                                                                                           format_date(row.moddate),
+                                                                                           ('-' * dashlimit))
+        if hidecontent == False:
+            content = row.content
+            if fullContent == False:
+                content = wrap_text(row.content, textlimit)
+            if highlighterAvailable == True:
+                content = highlight(content, BashLexer(), TerminalFormatter())
+            message = '$COLOR{0} - {1} $RESET(tags: $COLOR{2}$RESET moddate: {3})\n{5}\n{4}\n{5}'.format(row.rowid,
+                                                                                                         row.description,
+                                                                                                         row.tags,
+                                                                                                         format_date(row.moddate),
+                                                                                                         content, ('-' * dashlimit))
+
+        message = message.replace("$RESET", RESET_SEQ).replace("$BOLD", BOLD_SEQ).replace("$COLOR", COLOR_SEQ);
+        try:
+            print message
+        except IOError as e:
+            """ When piping the results to another process like 'head'
+                a IOError can occur. We can safely ignore these
+            """
+            sys.stderr.close()
+            sys.stdout.close()
+            pass
+
+def wrap_text(text, width=100):
+    substr = text[0:width]
+    if substr != text:
+        substr += '...'
+    return substr
+
+#===== ACTION DEFINITIONS =====#
+def create(option, opt, value, parser):
+    t = tempfile.NamedTemporaryFile(delete=False)
+    try:
+        editor = os.environ['EDITOR']
+    except KeyError:
+        editor = 'vim'
+    subprocess.call([editor, t.name])
+    content = open(t.name, 'r').read();
+
+    desc = rlinput('Description: ');
+    tags = rlinput('Tags (comma separated): ');
+    if desc == "":
+        print "ERROR: Description is required!"
+        sys.exit(1)
+    KbItem(desc, tags, content).create();
+    print "Successfully added item"
+    sys.exit(0)
+
+def edit(option, opt, value, parser):
+    item = KbItems().fetch_by_id(value);
+
+    t = tempfile.NamedTemporaryFile()
+    t.write(item.content);
+    t.flush()
+
+    try:
+        editor = os.environ['EDITOR']
+    except KeyError:
+        editor = 'vi'
+    subprocess.call([editor, t.name])
+    content = open(t.name, 'r').read();
+
+    desc = rlinput('Description: ', item.description);
+    tags = rlinput('Tags (comma separated): ', item.tags);
+
+    KbItem(desc, tags, content).update(value);
+    print "Successfully updated item {}".format(value);
+    sys.exit(0)
+
+def delete(option, opt, value, parser):
+    item = KbItems().fetch_by_id(value);
+    confirm = raw_input('Are you sure you want to delete "'+item.description+'" (type \'yes\'): ')
+    if confirm == "yes":
+        KbItems().delete(value);
+        print "Successfully deleted item {}".format(value);
+
+    sys.exit(0)
+
+def search(option, opt, value, parser):
+    print "Searching for '" + value + "'.."
+    show_list(KbItems().search(value, parser.values.limit), parser.values.hidecontent)
+    sys.exit(0)
+
+def listing(opts):
+    show_list(KbItems().listing(opts.limit), opts.hidecontent)
+    sys.exit(0)
+
+def item(option, opt, value, parser):
+    show_list([KbItems().fetch_by_id(value)], False, True)
+    sys.exit(0)
+
+
+#===== MAIN =====#
+def main():
+    p = optparse.OptionParser(description='%prog - Command Line Knowledge Base', version='%prog - '+__version__+' - '+__copyright__)
+    p.add_option('--create', '-c', action="callback",
+                 callback=create, help="create a new item")
+    p.add_option('--edit', '-e', action="callback",
+                 callback=edit, dest="id", metavar="ID",
+                 type="int", help="edit a item")
+    p.add_option('--delete', '-d', action="callback",
+                 callback=delete, dest="id", metavar="ID",
+                 type="int", help="delete a item")
+    p.add_option('--search', '-s', action="callback",
+                 callback=search, dest="query", metavar="QUERY",
+                 type="string", help="search items")
+    p.add_option('--item', '-i', action="callback",
+                 callback=item, dest="id", metavar="ID",
+                 type="int", help="show the item")
+
+    group = optparse.OptionGroup(p, "List/search options",
+                                 "These options can be used when searching or listing the items")
+    group.add_option('--limit', '-l', dest="limit", metavar="LIMIT",
+                     type="int", help="limit the listing to [LIMIT] items (default 50)", default=50)
+    group.add_option('--hide-content', action="store_true", dest="hidecontent",
+                     help="hides the content in the listing", default=False)
+    p.add_option_group(group)
+    opts, args = p.parse_args()
+
+    listing(opts)
+
+    sys.exit(0);
+
+if __name__ == "__main__":
+    try:
+        main()
+    except ValueError as strerror:
+        print strerror
+    except (KeyboardInterrupt):
+        print "\nExit\n"
+        sys.exit(1);
+
