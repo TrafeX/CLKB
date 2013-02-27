@@ -1,2 +1,2 @@
-python-dateutil==1.5
-pysqlite==1.0.1
+python-dateutil
+pysqlite
