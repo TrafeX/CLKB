@@ -3,6 +3,8 @@ Command Line Knowledge Base
 A command line app to manage knowledge base snippets, nifty one-liners and everything you simply want to store by using the command line.
 When you create a new item your favorite CLI-editor pops up and lets you add the content. When you close the editor you'll be aked for a short description and optionally some tags to quickly find it back.
 
+Master branch: [![Build Status](https://travis-ci.org/TrafeX/CLKB.png?branch=master)](https://travis-ci.org/TrafeX/CLKB)
+Develop branch: [![Build Status](https://travis-ci.org/TrafeX/CLKB.png?branch=develop)](https://travis-ci.org/TrafeX/CLKB)
 
 Install
 =======
