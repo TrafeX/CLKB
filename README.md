@@ -65,3 +65,5 @@ TODO
     [X] Maybe a sort of syntax highlighting
     [ ] Add the option to store the DB on a other location
     [ ] Write a unit test
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/TrafeX/CLKB/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
